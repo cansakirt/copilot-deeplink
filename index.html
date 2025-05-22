@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Copilot App Deeplink - Final Attempts</title>
+        <title>Copilot App Deeplink - `copilotn://conversation` Prefill Test</title>
         <style>
             body {
                 font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans",
@@ -16,8 +16,7 @@
                 margin: 0 auto;
             }
             h1,
-            h2,
-            h3 {
+            h2 {
                 color: #333;
             }
             h2 {
@@ -25,13 +24,9 @@
                 border-bottom: 1px solid #eee;
                 padding-bottom: 8px;
             }
-            h3 {
-                margin-top: 20px;
-                color: #444;
-            }
             .info,
             .important-note,
-            .final-thoughts {
+            .final-summary {
                 background-color: #eef7ff;
                 border-left: 4px solid #007bff;
                 padding: 15px;
@@ -47,7 +42,7 @@
                 background-color: #fff3cd;
                 border-left-color: #ffeeba;
             }
-            .final-thoughts {
+            .final-summary {
                 background-color: #f8d7da;
                 border-left-color: #dc3545;
                 color: #721c24;
@@ -104,7 +99,7 @@
             .test-case .actions button:hover {
                 background-color: #0056b3;
             }
-            .primary-target {
+            .primary-candidate {
                 border-left: 4px solid #28a745;
             }
             .long-shot {
@@ -114,231 +109,167 @@
     </head>
     <body>
         <div class="container">
-            <h1>Copilot App Deeplink - Final Attempts</h1>
+            <h1>Copilot App Deeplink - `copilotn://conversation` Prefill Test</h1>
 
             <div class="info success-info">
+                <p><strong>Confirmed:</strong> <code>copilotn://conversation</code> opens a new chat in the native app.</p>
                 <p>
-                    <strong>Recap:</strong> <code>copilotn://conversation</code> successfully creates a new chat in the native app. We are
-                    now making final attempts to prefill the message using this path and also re-testing Universal Links.
+                    <strong>Current Goal:</strong> Find a query parameter that, when appended to this path, will prefill the composer text.
                 </p>
             </div>
 
             <label for="prefillText">Text to Prefill:</label>
-            <input type="text" id="prefillText" value="Final prefill attempt!" />
+            <input type="text" id="prefillText" value="Testing prefill for conversation path..." />
 
-            <div id="test-sections">
+            <div id="test-area">
                 <!-- Test cases will be dynamically inserted here -->
             </div>
         </div>
 
         <script>
             const prefillInput = document.getElementById("prefillText");
-            const sectionsContainer = document.getElementById("test-sections");
+            const testAreaContainer = document.getElementById("test-area");
 
             function getCurrentEncodedText() {
                 return encodeURIComponent(document.getElementById("prefillText").value);
             }
 
             function generateTestCases() {
-                sectionsContainer.innerHTML = ""; // Clear previous
+                testAreaContainer.innerHTML = ""; // Clear previous
                 const encodedText = getCurrentEncodedText(); // Get current text for initial URL patterns
+                const basePath = "copilotn://conversation";
 
-                const sections = {
-                    customSchemeFocus: {
-                        title: "Focused Custom Scheme: `copilotn://conversation` + Parameters",
-                        description: `Since <code>copilotn://conversation</code> opens a new chat, these are the most plausible parameter variations for prefilling with that specific path.`,
-                        tests: [
-                            {
-                                id: "conv_prompt",
-                                name: `<code>copilotn://conversation?prompt=</code>`,
-                                urlPatternBase: `copilotn://conversation?prompt=`,
-                                notes: "<strong>Highest probability for this path.</strong>",
-                                isPrimaryTarget: true,
-                            },
-                            {
-                                id: "conv_q",
-                                name: `<code>copilotn://conversation?q=</code>`,
-                                urlPatternBase: `copilotn://conversation?q=`,
-                                notes: "Alternative 'query' parameter.",
-                            },
-                            {
-                                id: "conv_text",
-                                name: `<code>copilotn://conversation?text=</code>`,
-                                urlPatternBase: `copilotn://conversation?text=`,
-                                notes: "Generic 'text' parameter.",
-                            },
-                            {
-                                id: "conv_message",
-                                name: `<code>copilotn://conversation?message=</code>`,
-                                urlPatternBase: `copilotn://conversation?message=`,
-                                notes: "Generic 'message' parameter.",
-                            },
-                            {
-                                id: "conv_initialText",
-                                name: `<code>copilotn://conversation?initialText=</code>`,
-                                urlPatternBase: `copilotn://conversation?initialText=`,
-                                notes: "Descriptive 'initialText'.",
-                            },
-                        ],
+                const parameterTests = [
+                    // --- Primary Candidates (Most Likely based on JS and web behavior) ---
+                    {
+                        param: "prompt",
+                        notes: "<strong>Highest probability.</strong> 'prompt' is used internally and for web prefill.",
+                        isPrimary: true,
                     },
-                    universalLinksRecheck: {
-                        title: "Re-check HTTPS / Universal Links",
-                        description:
-                            "It's crucial to confirm if these HTTPS links open the NATIVE APP and prefill. If they do, this is the preferred iOS method.",
-                        tests: [
-                            {
-                                id: "https_copilotRootPrompt",
-                                name: "<code>https://copilot.microsoft.com/?prompt=</code>",
-                                urlPatternBase: `https://copilot.microsoft.com/?prompt=`,
-                                isPrimaryTarget: true,
-                            },
-                            {
-                                id: "https_copilotChatsNewPrompt",
-                                name: "<code>https://copilot.microsoft.com/chats/new?prompt=</code>",
-                                urlPatternBase: `https://copilot.microsoft.com/chats/new?prompt=`,
-                            },
-                            {
-                                id: "https_bingChatPrompt",
-                                name: "<code>https://www.bing.com/chat?prompt=</code>",
-                                urlPatternBase: `https://www.bing.com/chat?prompt=`,
-                            },
-                        ],
+                    { param: "q", notes: "Common query parameter, used by Bing web.", isPrimary: true },
+                    { param: "text", notes: "Generic 'text' parameter." },
+                    { param: "message", notes: "Generic 'message' parameter." },
+
+                    // --- Secondary Candidates (Common but less specific) ---
+                    { param: "input", notes: "Generic 'input' parameter." },
+                    { param: "value", notes: "Generic 'value' parameter." },
+                    { param: "query", notes: "Alternative to 'q'." },
+                    { param: "search", notes: "Another search-related term." },
+                    { param: "initialText", notes: "More descriptive for an initial prefill." },
+                    { param: "composerText", notes: "Specific to composer." },
+                    { param: "startText", notes: "Implies text at the start of a conversation." },
+                    { param: "prefill", notes: "Directly using the 'prefill' term." },
+                    { param: "start_prompt", notes: "Parameter possibly hinting at starting action with a prompt." }, // Underscore sometimes used
+                    { param: "initial_prompt", notes: "Another variation with underscore." },
+
+                    // --- Case Variations (Less likely, but possible if parsing is picky) ---
+                    { param: "Prompt", notes: "CamelCase 'Prompt'." },
+                    { param: "Q", notes: "CamelCase 'Q'." },
+
+                    // --- Long Shot: JSON action payload (Highly Speculative for this path) ---
+                    {
+                        param: "action",
+                        isPayload: true, // Special handling for this parameter
+                        notes: '<strong>Long Shot:</strong> Sends a URL-encoded JSON object like <code>{type: "prefillComposer", prompt: "..."}</code> as the value of the \'action\' parameter. This mimics the internal widget structure but is very unlikely for a simple scheme path.',
+                        isLongShot: true,
                     },
-                    longShots: {
-                        title: "Long Shot - Action Payload (Highly Speculative)",
-                        description:
-                            "This tests if the app might accept a URL-encoded JSON payload, similar to its internal action structure. This is very unlikely for a simple custom URL scheme.",
-                        tests: [
-                            {
-                                id: "conv_action_payload",
-                                name: `<code>copilotn://conversation?action={payload}</code>`,
-                                isPayloadTest: true, // Special handling
-                                notes: "Extremely speculative.",
-                                isLongShot: true,
-                            },
-                            {
-                                id: "root_action_payload",
-                                name: `<code>copilotn://?action={payload}</code>`,
-                                isPayloadTest: true, // Special handling
-                                notes: "Action payload at root. Also very speculative.",
-                                isLongShot: true,
-                            },
-                        ],
-                    },
-                };
+                ];
 
-                for (const sectionKey in sections) {
-                    const sectionData = sections[sectionKey];
-                    const sectionEl = document.createElement("section");
+                const sectionTitleEl = document.createElement("h2");
+                sectionTitleEl.textContent = "Parameter Tests for `copilotn://conversation`";
+                testAreaContainer.appendChild(sectionTitleEl);
 
-                    const sectionTitleEl = document.createElement("h2");
-                    sectionTitleEl.textContent = sectionData.title;
-                    sectionEl.appendChild(sectionTitleEl);
+                parameterTests.forEach((test) => {
+                    const div = document.createElement("div");
+                    div.className = "test-case";
+                    if (test.isPrimary) div.classList.add("primary-candidate");
+                    if (test.isLongShot) div.classList.add("long-shot");
 
-                    const sectionDescEl = document.createElement("p");
-                    sectionDescEl.innerHTML = sectionData.description;
-                    sectionEl.appendChild(sectionDescEl);
+                    let urlToTest;
+                    let displayName;
 
-                    sectionData.tests.forEach((test) => {
-                        const div = document.createElement("div");
-                        div.className = "test-case";
-                        if (test.isPrimaryTarget) div.classList.add("primary-target");
-                        if (test.isLongShot) div.classList.add("long-shot");
+                    if (test.isPayload) {
+                        // For display purposes, show a conceptual structure
+                        const exampleActionObject = { type: "prefillComposer", prompt: "{TEXT}" };
+                        const examplePayload = encodeURIComponent(JSON.stringify(exampleActionObject));
+                        displayName = `<code>${basePath}?${test.param}=${examplePayload.replace(
+                            encodeURIComponent("{TEXT}"),
+                            "{ENCODED_TEXT}"
+                        )}</code>`;
+                        // Actual URL construction will happen on click
+                    } else {
+                        urlToTest = `${basePath}?${test.param}=${encodedText}`;
+                        displayName = `<code>${urlToTest}</code>`;
+                    }
 
-                        const nameP = document.createElement("p");
-                        nameP.innerHTML = `<strong>Test:</strong> ${test.name}`;
-                        div.appendChild(nameP);
+                    const nameP = document.createElement("p");
+                    // For display, replace the actual encoded text with a placeholder if it's long
+                    let displayUrlForName = displayName;
+                    if (encodedText.length > 30 && !test.isPayload) {
+                        displayUrlForName = `<code>${basePath}?${test.param}=${encodedText.substring(0, 15)}...</code>`;
+                    }
+                    nameP.innerHTML = `<strong>Try parameter:</strong> ${
+                        test.isPayload ? `<code>${test.param}</code> (with JSON payload)` : `<code>${test.param}</code>`
+                    } <br> <small><em>Example: ${displayUrlForName}</em></small>`;
+                    div.appendChild(nameP);
 
-                        if (test.notes) {
-                            const notesP = document.createElement("p");
-                            notesP.className = "description";
-                            notesP.innerHTML = test.notes;
-                            div.appendChild(notesP);
-                        }
+                    if (test.notes) {
+                        const notesP = document.createElement("p");
+                        notesP.className = "description";
+                        notesP.innerHTML = test.notes;
+                        div.appendChild(notesP);
+                    }
 
-                        let currentUrlPattern;
-                        if (test.isPayloadTest) {
-                            const actionObject = { type: "prefillComposer", prompt: "Placeholder for payload test" }; // Actual text will be subbed on click
-                            const examplePayload = encodeURIComponent(JSON.stringify(actionObject));
-                            if (test.id.startsWith("conv_")) {
-                                currentUrlPattern = `copilotn://conversation?action=${examplePayload}`;
-                            } else {
-                                currentUrlPattern = `copilotn://?action=${examplePayload}`;
-                            }
-                            const urlP = document.createElement("p");
-                            urlP.innerHTML = `<em>Example URL structure:</em> <code>${currentUrlPattern.replace(
-                                encodeURIComponent("Placeholder for payload test"),
-                                "{ENCODED_TEXT_HERE}"
-                            )}</code>`;
-                            div.appendChild(urlP);
+                    const actionsDiv = document.createElement("div");
+                    actionsDiv.className = "actions";
+
+                    const button = document.createElement("button");
+                    button.textContent = "Test via JS Redirect";
+                    button.onclick = () => {
+                        let finalUrl;
+                        const currentLiveEncodedText = getCurrentEncodedText();
+                        if (test.isPayload) {
+                            const actionObject = { type: "prefillComposer", prompt: document.getElementById("prefillText").value };
+                            const livePayload = encodeURIComponent(JSON.stringify(actionObject));
+                            finalUrl = `${basePath}?${test.param}=${livePayload}`;
                         } else {
-                            currentUrlPattern = test.urlPatternBase + encodedText;
-                            const urlP = document.createElement("p");
-                            urlP.innerHTML = `<em>Generated URL:</em> <code>${currentUrlPattern}</code>`;
-                            div.appendChild(urlP);
+                            finalUrl = `${basePath}?${test.param}=${currentLiveEncodedText}`;
                         }
+                        console.log("Attempting JS redirect to:", finalUrl);
+                        window.location.href = finalUrl;
+                    };
+                    actionsDiv.appendChild(button);
 
-                        const actionsDiv = document.createElement("div");
-                        actionsDiv.className = "actions";
+                    const link = document.createElement("a");
+                    link.textContent = "Test via <a> Link";
+                    link.href = "#";
+                    link.onclick = (e) => {
+                        e.preventDefault();
+                        let finalUrl;
+                        const currentLiveEncodedText = getCurrentEncodedText();
+                        if (test.isPayload) {
+                            const actionObject = { type: "prefillComposer", prompt: document.getElementById("prefillText").value };
+                            const livePayload = encodeURIComponent(JSON.stringify(actionObject));
+                            finalUrl = `${basePath}?${test.param}=${livePayload}`;
+                        } else {
+                            finalUrl = `${basePath}?${test.param}=${currentLiveEncodedText}`;
+                        }
+                        console.log("Attempting <a> link to:", finalUrl);
+                        window.location.href = finalUrl;
+                        return false;
+                    };
+                    actionsDiv.appendChild(link);
+                    div.appendChild(actionsDiv);
+                    testAreaContainer.appendChild(div);
+                });
 
-                        const button = document.createElement("button");
-                        button.textContent = "Test via JS Redirect";
-                        button.onclick = () => {
-                            let finalUrl;
-                            if (test.isPayloadTest) {
-                                const actionObject = { type: "prefillComposer", prompt: document.getElementById("prefillText").value };
-                                const livePayload = encodeURIComponent(JSON.stringify(actionObject));
-                                if (test.id.startsWith("conv_")) {
-                                    finalUrl = `copilotn://conversation?action=${livePayload}`;
-                                } else {
-                                    finalUrl = `copilotn://?action=${livePayload}`;
-                                }
-                            } else {
-                                finalUrl = test.urlPatternBase + getCurrentEncodedText();
-                            }
-                            console.log("Attempting JS redirect to:", finalUrl);
-                            window.location.href = finalUrl;
-                        };
-                        actionsDiv.appendChild(button);
-
-                        const link = document.createElement("a");
-                        link.textContent = "Test via <a> Link";
-                        link.href = "#";
-                        link.onclick = (e) => {
-                            e.preventDefault();
-                            let finalUrl;
-                            if (test.isPayloadTest) {
-                                const actionObject = { type: "prefillComposer", prompt: document.getElementById("prefillText").value };
-                                const livePayload = encodeURIComponent(JSON.stringify(actionObject));
-                                if (test.id.startsWith("conv_")) {
-                                    finalUrl = `copilotn://conversation?action=${livePayload}`;
-                                } else {
-                                    finalUrl = `copilotn://?action=${livePayload}`;
-                                }
-                            } else {
-                                finalUrl = test.urlPatternBase + getCurrentEncodedText();
-                            }
-                            console.log("Attempting <a> link to:", finalUrl);
-                            window.location.href = finalUrl;
-                            return false;
-                        };
-                        actionsDiv.appendChild(link);
-                        div.appendChild(actionsDiv);
-                        sectionEl.appendChild(div);
-                    });
-                    sectionsContainer.appendChild(sectionEl);
-                }
-
-                const finalThoughtsEl = document.createElement("div");
-                finalThoughtsEl.className = "final-thoughts";
-                finalThoughtsEl.innerHTML = `<h3>Final Thoughts</h3>
-                                        <p>If none of these tests result in the native app opening AND prefilling the composer:</p>
-                                        <ul>
-                                            <li><strong>Universal Links (HTTPS):</strong> The app may not be fully configured to handle these specific URLs/parameters for native prefill, or they might only prefill the web view.</li>
-                                            <li><strong>Custom Scheme (<code>copilotn://conversation</code>):</strong> While it opens a new chat, it likely isn't designed to parse additional query parameters for prefilling from an external call. The internal prefill mechanisms (like the <code>widgets.json</code>) are not directly exposed via this simple scheme.</li>
-                                        </ul>
-                                        <p>In such a case, the app developers would need to explicitly add support for this exact deeplinking prefill feature via either Universal Links or by enhancing their custom URL scheme handler.</p>`;
-                sectionsContainer.appendChild(finalThoughtsEl);
+                const finalSummaryEl = document.createElement("div");
+                finalSummaryEl.className = "final-summary";
+                finalSummaryEl.innerHTML = `<h3>Summary & Next Steps</h3>
+                                        <p>You are testing various query parameters appended to <code>copilotn://conversation</code>. The app opens a new chat with this base path. The goal is to find a parameter that also prefills the text.</p>
+                                        <p>If none of these work, it strongly indicates that the <code>copilotn://conversation</code> handler in the native app, while creating a new chat, is not designed to parse additional query parameters for prefilling the composer text from an external URL call. The internal prefill mechanisms (like those seen in <code>widgets.json</code> and JavaScript using <code>{type: \"prefillComposer\", prompt: \"...\"}</code>) are not being exposed or translated through this specific custom scheme path.</p>
+                                        <p>At that point, the only way to achieve this would be if Microsoft updates the app to support such a parameter for this deeplink path, or if Universal Links (HTTPS) are found to correctly open and prefill the native app.</p>`;
+                testAreaContainer.appendChild(finalSummaryEl);
             }
 
             prefillInput.addEventListener("input", generateTestCases); // Regenerate if text changes
