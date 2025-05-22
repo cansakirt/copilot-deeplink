@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Copilot App Deeplink - `conversation` Path Focus</title>
+        <style>
+            body {
+                font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans",
+                    "Helvetica Neue", sans-serif;
+                margin: 20px;
+                line-height: 1.6;
+            }
+            .container {
+                max-width: 700px;
+                margin: 0 auto;
+            }
+            h1,
+            h2 {
+                color: #333;
+            }
+            h2 {
+                margin-top: 30px;
+                border-bottom: 1px solid #eee;
+                padding-bottom: 8px;
+            }
+            .info,
+            .important-note {
+                background-color: #eef7ff;
+                border-left: 4px solid #007bff;
+                padding: 15px;
+                margin-bottom: 20px;
+                border-radius: 4px;
+            }
+            .success-info {
+                background-color: #d4edda;
+                border-left-color: #28a745;
+                color: #155724;
+            }
+            label {
+                font-weight: 600;
+                display: block;
+                margin-bottom: 8px;
+                color: #555;
+            }
+            input[type="text"] {
+                width: calc(100% - 24px);
+                padding: 10px;
+                margin-bottom: 25px;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                font-size: 16px;
+            }
+            .test-case {
+                margin-bottom: 20px;
+                padding: 15px;
+                border: 1px solid #e0e0e0;
+                border-radius: 5px;
+                background-color: #f9f9f9;
+            }
+            .test-case p.description {
+                font-size: 0.95em;
+                color: #555;
+                margin-bottom: 10px;
+            }
+            .test-case code {
+                background-color: #f0f0f0;
+                padding: 2px 5px;
+                border-radius: 3px;
+                font-size: 0.9em;
+                word-break: break-all;
+            }
+            .test-case .actions a,
+            .test-case .actions button {
+                margin-right: 10px;
+                margin-bottom: 5px; /* For wrapping */
+                padding: 9px 15px;
+                background-color: #007bff;
+                color: white;
+                border: none;
+                border-radius: 4px;
+                text-decoration: none;
+                cursor: pointer;
+                display: inline-block;
+                font-size: 14px;
+                transition: background-color 0.2s ease;
+            }
+            .test-case .actions a:hover,
+            .test-case .actions button:hover {
+                background-color: #0056b3;
+            }
+            .primary-target {
+                border-left: 4px solid #28a745;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>Copilot App Deeplink - Focused Test</h1>
+
+            <div class="info success-info">
+                <p>
+                    <strong>Great Progress!</strong> We know <code>copilotn://conversation</code> successfully creates a new chat in the
+                    app.
+                </p>
+                <p>Now, we'll append various query parameters to this specific path to attempt prefilling the message box.</p>
+            </div>
+
+            <label for="prefillText">Text to Prefill:</label>
+            <input type="text" id="prefillText" value="Prefilling with conversation path!" />
+
+            <div id="test-sections">
+                <!-- Test cases will be dynamically inserted here -->
+            </div>
+        </div>
+
+        <script>
+            const prefillInput = document.getElementById("prefillText");
+            const sectionsContainer = document.getElementById("test-sections");
+
+            function generateTestCases() {
+                sectionsContainer.innerHTML = ""; // Clear previous
+                const textToPrefill = prefillInput.value;
+                const encodedText = encodeURIComponent(textToPrefill);
+
+                const basePath = "copilotn://conversation";
+
+                const sections = {
+                    focusedConversationPath: {
+                        title: "Testing Prefill with `copilotn://conversation` Path",
+                        description: `The path <code>${basePath}</code> creates a new chat. These tests try adding common query parameters to it. The <strong>prompt</strong> parameter is the strongest candidate based on web behavior and JS snippets.`,
+                        tests: [
+                            // --- Primary Candidates (Most Likely) ---
+                            {
+                                id: "conv_prompt",
+                                name: `<code>${basePath}?prompt=</code>`,
+                                urlPattern: `${basePath}?prompt=${encodedText}`,
+                                notes: "<strong>Highest probability.</strong> Uses 'prompt' which is prevalent in the app's JS.",
+                                isPrimaryTarget: true,
+                            },
+                            {
+                                id: "conv_q",
+                                name: `<code>${basePath}?q=</code>`,
+                                urlPattern: `${basePath}?q=${encodedText}`,
+                                notes: "Uses 'q', common for queries and works for Bing web.",
+                            },
+                            {
+                                id: "conv_text",
+                                name: `<code>${basePath}?text=</code>`,
+                                urlPattern: `${basePath}?text=${encodedText}`,
+                                notes: "Generic 'text' parameter.",
+                            },
+                            {
+                                id: "conv_message",
+                                name: `<code>${basePath}?message=</code>`,
+                                urlPattern: `${basePath}?message=${encodedText}`,
+                                notes: "Generic 'message' parameter.",
+                            },
+
+                            // --- Secondary Candidates (Less Common but Possible) ---
+                            {
+                                id: "conv_input",
+                                name: `<code>${basePath}?input=</code>`,
+                                urlPattern: `${basePath}?input=${encodedText}`,
+                                notes: "Generic 'input' parameter.",
+                            },
+                            {
+                                id: "conv_value",
+                                name: `<code>${basePath}?value=</code>`,
+                                urlPattern: `${basePath}?value=${encodedText}`,
+                                notes: "Generic 'value' parameter.",
+                            },
+                            {
+                                id: "conv_query",
+                                name: `<code>${basePath}?query=</code>`,
+                                urlPattern: `${basePath}?query=${encodedText}`,
+                                notes: "Alternative to 'q'.",
+                            },
+                            {
+                                id: "conv_search",
+                                name: `<code>${basePath}?search=</code>`,
+                                urlPattern: `${basePath}?search=${encodedText}`,
+                                notes: "Another search-related term.",
+                            },
+                            {
+                                id: "conv_initialText",
+                                name: `<code>${basePath}?initialText=</code>`,
+                                urlPattern: `${basePath}?initialText=${encodedText}`,
+                                notes: "More descriptive for an initial prefill.",
+                            },
+                            {
+                                id: "conv_prefill",
+                                name: `<code>${basePath}?prefill=</code>`,
+                                urlPattern: `${basePath}?prefill=${encodedText}`,
+                                notes: "Directly using the 'prefill' term seen in JS (though context was different).",
+                            },
+                            {
+                                id: "conv_start_prompt", // Parameter name sometimes contains action
+                                name: `<code>${basePath}?start_prompt=</code>`,
+                                urlPattern: `${basePath}?start_prompt=${encodedText}`,
+                                notes: "Parameter hinting at starting with a prompt.",
+                            },
+
+                            // --- Variants with `&showconv=1` (Less likely for custom scheme, but for completeness) ---
+                            {
+                                id: "conv_prompt_showconv",
+                                name: `<code>${basePath}?prompt=&showconv=1</code>`,
+                                urlPattern: `${basePath}?prompt=${encodedText}&showconv=1`,
+                                notes: "Adding 'showconv=1', though likely web-specific.",
+                            },
+                            {
+                                id: "conv_q_showconv",
+                                name: `<code>${basePath}?q=&showconv=1</code>`,
+                                urlPattern: `${basePath}?q=${encodedText}&showconv=1`,
+                                notes: "Adding 'showconv=1'.",
+                            },
+                        ],
+                    },
+                };
+
+                for (const sectionKey in sections) {
+                    const sectionData = sections[sectionKey];
+                    const sectionEl = document.createElement("section");
+
+                    const sectionTitle = document.createElement("h2");
+                    sectionTitle.textContent = sectionData.title;
+                    sectionEl.appendChild(sectionTitle);
+
+                    const sectionDesc = document.createElement("p");
+                    sectionDesc.innerHTML = sectionData.description; // Allow HTML for code tags
+                    sectionEl.appendChild(sectionDesc);
+
+                    sectionData.tests.forEach((test) => {
+                        const div = document.createElement("div");
+                        div.className = "test-case";
+                        if (test.isPrimaryTarget) div.classList.add("primary-target");
+
+                        const nameP = document.createElement("p");
+                        nameP.innerHTML = `<strong>Test:</strong> ${test.name}`; // name already contains code tag
+                        div.appendChild(nameP);
+
+                        if (test.notes) {
+                            const notesP = document.createElement("p");
+                            notesP.className = "description";
+                            notesP.innerHTML = test.notes; // Allow HTML for bolding
+                            div.appendChild(notesP);
+                        }
+
+                        const urlP = document.createElement("p");
+                        urlP.innerHTML = `<em>Generated URL:</em> <code>${test.urlPattern}</code>`;
+                        div.appendChild(urlP);
+
+                        const actionsDiv = document.createElement("div");
+                        actionsDiv.className = "actions";
+
+                        const button = document.createElement("button");
+                        button.textContent = "Test via JS Redirect";
+                        button.onclick = () => {
+                            const currentText = document.getElementById("prefillText").value;
+                            const currentEncodedText = encodeURIComponent(currentText);
+                            // Reconstruct URL with current text to ensure it's fresh
+                            const finalUrl = test.urlPattern.replace(encodedText, currentEncodedText);
+                            console.log("Attempting JS redirect to:", finalUrl);
+                            window.location.href = finalUrl;
+                        };
+                        actionsDiv.appendChild(button);
+
+                        const link = document.createElement("a");
+                        link.textContent = "Test via <a> Link";
+                        link.href = "#"; // Placeholder
+                        link.onclick = (e) => {
+                            e.preventDefault();
+                            const currentText = document.getElementById("prefillText").value;
+                            const currentEncodedText = encodeURIComponent(currentText);
+                            const finalUrl = test.urlPattern.replace(encodedText, currentEncodedText);
+                            console.log("Attempting <a> link to:", finalUrl);
+                            window.location.href = finalUrl;
+                            return false;
+                        };
+                        actionsDiv.appendChild(link);
+                        div.appendChild(actionsDiv);
+                        sectionEl.appendChild(div);
+                    });
+                    sectionsContainer.appendChild(sectionEl);
+                }
+                const importantNote = document.createElement("div");
+                importantNote.className = "important-note";
+                importantNote.innerHTML = `<p><strong>Important:</strong> Test these on your iOS device in Safari. Each link will attempt to open the app and (hopefully) prefill the text. Check the composer input field in the app carefully after each test.</p>`;
+                sectionsContainer.appendChild(importantNote);
+            }
+
+            prefillInput.addEventListener("input", generateTestCases);
+            window.addEventListener("load", generateTestCases);
+        </script>
+    </body>
+</html>
